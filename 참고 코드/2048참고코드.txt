@@ -1,0 +1,159 @@
+#include<stdio.h>
+#include<windows.h>
+#include<time.h>
+#include<conio.h>
+#include<stdlib.h>
+
+#define TRUE 1
+#define SIZE 4
+
+void DrawMap(int* score, int board[][4])
+{
+	system("cls");
+	for (int i = 0; i < SIZE; i++)
+	{
+		for (int j = 0; j < SIZE; j++)
+		{
+			if (board[i][j] == 0)
+				printf("    .");
+			else
+				printf("%5d", board[i][j]);
+		}
+		printf("\n");
+	}
+	printf("\n");
+	printf("Score: %d", *score);
+}
+
+void NewNum(int board[][4])
+{
+	int count = 0;
+	int* p[16] = { 0 };
+	for (int i = 0; i < SIZE; i++)
+	{
+		for (int j = 0; j < SIZE; j++)
+			if (board[i][j] == 0)
+			{
+				p[count] = &board[i][j];
+				count++;
+			}
+	}
+	if (count != 0)
+		*p[rand() % count] = (rand() % 100 < 80) ? 2 : 4;
+}
+void CheckGameover(int board[][4])
+{
+	for (int i = 0; i < SIZE; i++)
+		for (int j = 0; j < SIZE; j++)
+			if (board[i][j] == 0)
+				return;
+	for (int i = 0; i < SIZE - 1; i++)
+		for (int j = 0; j < SIZE - 1; j++)
+			if (board[i][j] == board[i + 1][j] || board[i][j] == board[i][j + 1])
+				return;
+	for (int i = 0; i < SIZE - 1; i++)
+		if (board[i][SIZE - 1] == board[i + 1][SIZE - 1])
+			return;
+	for (int j = 0; j < SIZE - 1; j++)
+		if (board[SIZE - 1][j] == board[SIZE - 1][j + 1])
+			return;
+
+	printf("\nGame Over!");
+	exit(0);
+}
+void MoveWidth(int board[][4], int way1, int way2, int startx, int starty, int* score)
+{
+	for (int y = starty; y >= 0 && y < SIZE; y += way1)
+	{
+		for (int x = startx; x >= 0 && x < SIZE; x += way2)
+		{
+			for (int r = x; r > 0 && r < SIZE -1; r -= way2)
+			{
+				if (board[y][r] == 0)//숫자가 0 처리할게 없음
+					break;
+				//내가 이동할 곳에 숫자가 있으면서 나랑 같지않으면 이동불가
+				if (board[y][r - way2] != 0 && board[y][r - way2] != board[y][r])
+					break;
+				if (board[y][r - way2] == 0)
+					board[y][r - way2] = board[y][r];
+				else if (board[y][r - way2] == board[y][r])
+				{
+					board[y][r - way2] *= 2;
+					*score += 2 * (board[y][r]);
+				}
+				board[y][r] = 0;
+			}
+		}
+	}
+}
+void MoveLength(int board[][4], int way1, int way2, int startx, int starty, int* score)
+{
+	for (int x = startx; x >= 0 && x < 4; x += way1)
+	{
+		for (int y = starty; y >= 0 && y < 4; y += way2)
+		{
+			for (int r = y; r >= 0 && r < 4; r -= way2)
+			{
+				if (board[r][x] == 0)
+					continue;
+				if (board[r - way2][x] != 0 && board[r - way2][x] != board[r][x])
+					continue;
+				if (r == starty)
+					continue;
+				if (board[r - way2][x] == 0)
+					board[r - way2][x] = board[r][x];
+				else if (board[r - way2][x] == board[r][x])
+				{
+					board[r - way2][x] *= 2;
+					*score += 2 * (board[r][x]);
+				}
+				board[r][x] = 0;
+			}
+		}
+	}
+}
+void main()
+{
+	int board[SIZE][SIZE] = {
+		{ 0,0,0,0 },
+		{ 0,0,0,0 },
+		{ 0,0,0,0 },
+		{ 0,0,0,0 } };
+
+	char key;
+	int score = 0;
+
+	srand((unsigned)time(NULL));
+	NewNum(board);
+	NewNum(board);
+	DrawMap(&score, board);
+
+	while (TRUE)
+	{
+		key = _getch();
+		switch (key)
+		{
+		case 'a':
+			MoveWidth(board, 1, 1, 0, 0, &score);
+			break;
+
+		case 'd':
+			MoveWidth(board, 1, -1, SIZE - 1, 0, &score);
+			break;
+
+		case 'w':
+			MoveLength(board, 1, 1, 0, 0, &score);
+			break;
+
+		case 's':
+			MoveLength(board, 1, -1, 0, SIZE - 1, &score);
+			break;
+		}
+		if (key == 'a' || key == 'd' || key == 'w' || key == 's')
+		{
+			DrawMap(&score, board);
+			CheckGameover(board);
+			NewNum(board);
+		}
+	}
+}

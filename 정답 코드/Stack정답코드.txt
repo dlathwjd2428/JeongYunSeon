@@ -1,0 +1,41 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+typedef struct Stack
+{
+	int data;
+	struct Stack* Next;
+}Stack;
+
+void push(Stack** top, int data)
+{
+	Stack* tmp = (Stack*)malloc(sizeof(Stack));
+	tmp->Next = *top;
+	tmp->data = data;
+	*top = tmp;
+	printf("push = %d\n", (*top)->data);
+}
+
+void pop(Stack** top)
+{
+	if ((*top) == NULL)
+	{
+		printf("Stack is Empty Data!\n");
+		return;
+	}
+	Stack* tmp = *top;
+	*top = tmp->Next;
+	int data = tmp->data;
+	free(tmp);
+	printf("pop = %d\n", data);
+}
+
+void main()
+{
+	Stack* top = NULL;
+	push(&top, 10);
+	push(&top, 20);
+	push(&top, 30);
+	while (top != NULL)
+		pop(&top);
+};

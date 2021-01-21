@@ -1,0 +1,133 @@
+#include<stdio.h>
+#include<conio.h>
+#include<time.h>
+#include<Windows.h>
+
+#define SPACE 32
+#define ESC 27
+#define CARSPEED 200
+#define MAX_WIDTH 100
+#define TRUE 1
+#define FALSE 0
+
+#define STATUS_MOVE 0
+#define STATUS_STAY 1
+#define STATUS_END 2
+
+typedef struct Car
+{
+	int Status;
+	int MoveSpeedTime;
+	int x;
+	struct Car* Next;
+}Car;
+
+
+void gotoxy(int x, int y)
+{
+	COORD Pos = { x, y };
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Pos);
+}
+void EraseCar(Car car)
+{
+	gotoxy(car.x, 10);
+	printf("            ");
+	gotoxy(car.x, 11);
+	printf("            ");
+	gotoxy(car.x, 12);
+	printf("            ");
+}
+
+void DrawCar(Car car)
+{
+	gotoxy(car.x, 10);
+	printf("  ┌──┐");
+	gotoxy(car.x, 11);
+	printf("┌┘▒▒└┐");
+	gotoxy(car.x, 12);
+	printf("└⊙──⊙┘");
+}
+
+void SetCar(Car* car)
+{
+	car->Next = NULL;
+	car->x = 10;
+	car->MoveSpeedTime = clock();
+	DrawCar(*car);
+	car->Status = STATUS_MOVE;
+}
+
+void EnQueue(Car** Front, Car** Rear)
+{
+	Car* tmp = (Car*)malloc(sizeof(Car));
+	SetCar(tmp);
+	if (*Front == NULL)
+	{
+		*Front = tmp;
+		*Rear = *Front;
+	}
+	else
+	{
+		(*Rear)->Next = tmp;
+		 *Rear = tmp;
+	}
+}
+
+void DeQueue(Car** Front, Car** Rear)
+{
+	if (*Front == NULL)
+		return;
+	Car* tmp = *Front;
+	*Front = (*Front)->Next;
+	if (*Front == NULL)
+		*Rear = NULL;
+	EraseCar(*tmp);
+	free(tmp);
+}
+
+void MoveCar(Car* Node)
+{
+	if (Node == NULL)
+		return;
+	if (clock() - Node->MoveSpeedTime >= CARSPEED)
+	{
+		EraseCar(*Node);
+		Node->x++;
+		DrawCar(*Node);
+		Node->MoveSpeedTime = clock();
+	}
+	MoveCar(Node->Next);
+}
+
+int CheckCarPosition(Car* Node)
+{
+	if (Node == NULL)
+		return FALSE;
+	else if (Node->x >= MAX_WIDTH)
+		return TRUE;
+	else
+		CheckCarPosition(Node->Next);
+}
+
+void main()
+{
+	Car* Front = NULL;
+	Car* Rear = NULL;
+	printf("자동차 추가 : Space");
+	while (true)
+	{
+		if (kbhit())
+		{
+			char ch = getch();
+			if (ch == SPACE)
+				EnQueue(&Front, &Rear);
+			else if (ch == ESC)
+				break;
+		}
+		MoveCar(Front);
+		if (CheckCarPosition(Front) == TRUE)
+			DeQueue(&Front, &Rear);
+	}
+	while (Front != NULL)
+		DeQueue(&Front, &Rear);
+}

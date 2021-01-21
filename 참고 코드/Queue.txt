@@ -1,0 +1,66 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+typedef struct Node
+{
+	int data;
+	struct Node* Next;
+}Node;
+
+void enqueue(Node** Front, Node** Rear, int data)
+{
+	Node* Tmp;
+	Tmp = (Node*)malloc(sizeof(Node));
+	Tmp->data = data;
+	Tmp->Next = NULL;
+	if (*Front != NULL)
+	{
+		(*Rear)->Next = Tmp;
+		*Rear = (*Rear)->Next;
+	}
+	else
+		*Rear = *Front = Tmp;
+	printf("Enqueue\n");
+	printf("Front = %d\n",(*Front)->data);
+	printf("Rear = %d\n",(*Rear)->data);
+}
+void dequeue(Node** Front, Node** Rear)
+{
+	Node* tmp;
+	if (*Front == NULL)
+	{
+		printf("정보가 없습니다.\n");
+		return;
+	}
+	tmp = *Front;
+	*Front = (*Front)->Next;
+	if (*Front == NULL)
+		*Rear = NULL;
+	printf("Dequeue = %d\n",tmp->data);
+	free(tmp);
+}
+
+void main()
+{
+	Node *Front = NULL, *Rear = NULL;
+	enqueue(&Front, &Rear, 10);
+	printf("\n");
+	enqueue(&Front, &Rear, 20);
+	printf("\n");
+	enqueue(&Front, &Rear, 30);
+	printf("\n");
+	dequeue(&Front, &Rear);
+	printf("\n");
+	dequeue(&Front, &Rear);
+	printf("\n");
+	dequeue(&Front, &Rear);
+	printf("\n");
+	dequeue(&Front, &Rear);
+	printf("\n");
+	enqueue(&Front, &Rear, 10);
+	printf("\n");
+	enqueue(&Front, &Rear, 20);
+	printf("\n");
+	enqueue(&Front, &Rear, 30);
+	printf("\n");
+};
