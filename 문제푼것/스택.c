@@ -29,7 +29,6 @@ void ShowStack(Node *Top)
 	printf("%d", Top->Data);
 	Top = Top->Link;
 	printf("\n");
-	system("pause");
 }
 void main()
 {
